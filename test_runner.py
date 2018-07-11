@@ -18,8 +18,8 @@ if __name__ == '__main__':
     smpl_path = os.path.realpath(sys.argv[1])
     smpl_model = SMPL(smpl_path)
 
-    betas = tf.random_normal([1, 10])
-    thetas = tf.random_normal([1, 10])
+    betas = tf.random_normal([1, 10], stddev=0.1)
+    thetas = tf.random_normal([1, 72], stddev=0.06)
 
     verts, _, _ = smpl_model(betas, thetas, get_skin=True)
     verts = verts[0]
@@ -27,9 +27,10 @@ if __name__ == '__main__':
     sess = tf.Session()
     result = sess.run(verts)
 
-    faces = np.load('smpl_faces.npy')
+    dirpath = os.path.dirname(os.path.realpath(__file__))
+    faces = np.load(os.path.join(dirpath, 'smpl_faces.npy'))
 
-    outmesh_path = './smpl_tf.obj'
+    outmesh_path = os.path.join(dirpath, 'smpl_tf.obj')
     with open(outmesh_path, 'w') as fp:
         for v in result:
             fp.write('v %f %f %f\n' % (v[0], v[1], v[2]))
