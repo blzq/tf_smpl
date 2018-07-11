@@ -40,7 +40,7 @@ def batch_rodrigues(theta, name=None):
     Theta is N x 3
     """
     with tf.variable_scope(name, "batch_rodrigues", [theta]):
-        batch_size = theta.shape.as_list()[0]
+        batch_size = tf.shape(theta)[0]
 
         angle = tf.expand_dims(tf.norm(theta + 1e-8, axis=1), -1)
         r = tf.expand_dims(tf.div(theta, angle), -1)
@@ -98,9 +98,8 @@ def batch_global_rigid_transformation(Rs, Js, parent, rotate_base=False):
       A     : `Tensor`: N x 24 4 x 4 relative joint transformations for LBS.
     """
     with tf.variable_scope("batch_forward_kinematics", [Rs, Js]):
-        N = Rs.shape[0].value
+        N = tf.shape(Rs)[0]
         if rotate_base:
-            print('Flipping the SMPL coordinate frame!!!!')
             rot_x = tf.constant(
                 [[1, 0, 0], [0, -1, 0], [0, 0, -1]], dtype=Rs.dtype)
             rot_x = tf.reshape(tf.tile(rot_x, [N, 1]), [N, 3, 3])

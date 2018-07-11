@@ -86,7 +86,7 @@ class SMPL(object):
         """
 
         with tf.variable_scope(name, "smpl_main", [beta, theta]):
-            num_batch = beta.shape[0].value
+            num_batch = tf.shape(beta)[0]
 
             # 1. Add shape blend shapes
             # (N x 10) x (10 x 6890*3) = N x 6890 x 3
