@@ -19,12 +19,14 @@ if __name__ == '__main__':
     smpl_model = SMPL(smpl_path)
 
     betas = tf.random_normal([1, 10], stddev=0.1)
-    thetas = tf.random_normal([1, 72], stddev=0.06)
+    thetas = tf.random_normal([1, 72], stddev=0.2)
 
     verts, _, _ = smpl_model(betas, thetas, get_skin=True)
     verts = verts[0]
 
-    sess = tf.Session()
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    sess = tf.Session(config=config)
     result = sess.run(verts)
 
     dirpath = os.path.dirname(os.path.realpath(__file__))
