@@ -1,4 +1,4 @@
-""" 
+"""
 Tensorflow SMPL implementation as batch.
 Specify joint types:
 'coco': Returns COCO+ 19 joints
@@ -6,20 +6,11 @@ Specify joint types:
 Note: To get original smpl joints, use self.J_transformed
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import numpy as np
-import cPickle as pickle
+import pickle
 
 import tensorflow as tf
 from .batch_lbs import batch_rodrigues, batch_global_rigid_transformation
-
-
-# There are chumpy variables so convert them to numpy.
-def undo_chumpy(x):
-    return x if isinstance(x, np.ndarray) else x.r
 
 
 class SMPL(object):
@@ -28,62 +19,54 @@ class SMPL(object):
         pkl_path is the path to a SMPL model
         """
         # -- Load SMPL params --
-        with open(pkl_path, 'r') as f:
-            dd = pickle.load(f)    
+        with open(pkl_path, 'rb') as f:
+            dd = pickle.load(f, encoding='latin1')
         # Mean template vertices
-        self.v_template = tf.Variable(
-            undo_chumpy(dd['v_template']),
+        self.v_template = tf.constant(
+            dd['v_template'],
             name='v_template',
-            dtype=dtype,
-            trainable=False)
+            dtype=dtype)
         # Size of mesh [Number of vertices, 3]
         self.size = [self.v_template.shape[0].value, 3]
         self.num_betas = dd['shapedirs'].shape[-1]
         # Shape blend shape basis: 6980 x 3 x 10
-        # reshaped to 6980*30 x 10, transposed to 10x6980*3
+        # reshaped to 6980*3 x 10, transposed to 10x6980*3
         shapedir = np.reshape(
-            undo_chumpy(dd['shapedirs']), [-1, self.num_betas]).T
-        self.shapedirs = tf.Variable(
-            shapedir, name='shapedirs', dtype=dtype, trainable=False)
+            dd['shapedirs'], [-1, self.num_betas]).T
+        self.shapedirs = tf.constant(
+            shapedir, name='shapedirs', dtype=dtype)
 
         # Regressor for joint locations given shape - 6890 x 24
-        self.J_regressor = tf.Variable(
+        self.J_regressor = tf.constant(
             dd['J_regressor'].T.todense(),
             name="J_regressor",
-            dtype=dtype,
-            trainable=False)
+            dtype=dtype)
 
         # Pose blend shape basis: 6890 x 3 x 207, reshaped to 6890*30 x 207
         num_pose_basis = dd['posedirs'].shape[-1]
         # 207 x 20670
         posedirs = np.reshape(
-            undo_chumpy(dd['posedirs']), [-1, num_pose_basis]).T
-        self.posedirs = tf.Variable(
-            posedirs, name='posedirs', dtype=dtype, trainable=False)
+            dd['posedirs'], [-1, num_pose_basis]).T
+        self.posedirs = tf.constant(
+            posedirs, name='posedirs', dtype=dtype)
 
         # indices of parents for each joints
         self.parents = dd['kintree_table'][0].astype(np.int32)
 
         # LBS weights
-        self.weights = tf.Variable(
-            undo_chumpy(dd['weights']),
+        self.weights = tf.constant(
+            dd['weights'],
             name='lbs_weights',
-            dtype=dtype,
-            trainable=False)
+            dtype=dtype)
 
         # This returns 19 keypoints: 6890 x 19
-        self.joint_regressor = tf.Variable(
+        self.joint_regressor = tf.constant(
             dd['cocoplus_regressor'].T.todense(),
             name="cocoplus_regressor",
-            dtype=dtype,
-            trainable=False)
+            dtype=dtype)
+
         if joint_type == 'lsp':  # 14 LSP joints!
             self.joint_regressor = self.joint_regressor[:, :14]
-
-        if joint_type not in ['cocoplus', 'lsp']:
-            print('BAD!! Unknown joint type: %s, it must be either "cocoplus" or "lsp"' % joint_type)
-            import ipdb
-            ipdb.set_trace()
 
     def __call__(self, beta, theta, get_skin=False, name=None):
         """
@@ -102,7 +85,7 @@ class SMPL(object):
           - Verts: N x 6980 x 3
         """
 
-        with tf.name_scope(name, "smpl_main", [beta, theta]):
+        with tf.variable_scope(name, "smpl_main", [beta, theta]):
             num_batch = beta.shape[0].value
 
             # 1. Add shape blend shapes
@@ -121,7 +104,7 @@ class SMPL(object):
             # N x 24 x 3 x 3
             Rs = tf.reshape(
                 batch_rodrigues(tf.reshape(theta, [-1, 3])), [-1, 24, 3, 3])
-            with tf.name_scope("lrotmin"):
+            with tf.variable_scope("lrotmin"):
                 # Ignore global rotation.
                 pose_feature = tf.reshape(Rs[:, 1:, :, :] - tf.eye(3),
                                           [-1, 207])

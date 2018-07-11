@@ -4,11 +4,8 @@ Util functions implementing the camera
 @@batch_orth_proj_idrot
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import tensorflow as tf
+
 
 def batch_orth_proj_idrot(X, camera, name=None):
     """
@@ -16,7 +13,7 @@ def batch_orth_proj_idrot(X, camera, name=None):
     camera is N x 3
     same as applying orth_proj_idrot to each N 
     """
-    with tf.name_scope(name, "batch_orth_proj_idrot", [X, camera]):
+    with tf.variable_scope(name, "batch_orth_proj_idrot", [X, camera]):
         # TODO check X dim size.
         # tf.Assert(X.shape[2] == 3, [X])
 
