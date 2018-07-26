@@ -1,13 +1,12 @@
 #!/usr/bin/python3
 # -*- encoding: utf-8 -*-
-# Run using python3 -m tf_smpl.test_runner from outside tf_smpl directory
 
 import sys
 import os
 import tensorflow as tf
 import numpy as np
 
-from .batch_smpl import SMPL
+from batch_smpl import SMPL
 
 
 if __name__ == '__main__':
