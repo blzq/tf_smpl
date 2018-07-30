@@ -6,7 +6,7 @@ import os
 import tensorflow as tf
 import numpy as np
 
-from batch_smpl import SMPL
+from .batch_smpl import SMPL
 
 
 if __name__ == '__main__':
