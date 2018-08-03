@@ -60,5 +60,5 @@ if __name__ == '__main__':
 
     img = sess.run(rendered)
     print(img.shape)
-    plt.imshow(img[0])
+    plt.imshow(img[0][:, :, 3])
     plt.show()
