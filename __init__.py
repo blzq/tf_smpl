@@ -1,1 +1,1 @@
-import tf_smpl.batch_smpl
+from . import batch_smpl

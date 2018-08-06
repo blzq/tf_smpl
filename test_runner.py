@@ -13,12 +13,13 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print("Usage: python3 test_runner.py <path-to-SMPL-model>")
         sys.exit()
-
+    
+    dirpath = os.path.dirname(os.path.realpath(__file__))
     smpl_path = os.path.realpath(sys.argv[1])
     smpl_model = SMPL(smpl_path)
-
-    betas = tf.random_normal([1, 10], stddev=0.1)
-    thetas = tf.random_normal([1, 72], stddev=0.2)
+  
+    betas = np.random.randn(1, 10).astype(np.float32) * 0.1
+    thetas = np.random.randn(1, 72).astype(np.float32) * 0.2
 
     verts, _, _ = smpl_model(betas, thetas, get_skin=True)
     verts = verts[0]
@@ -28,9 +29,8 @@ if __name__ == '__main__':
     sess = tf.Session(config=config)
     result = sess.run(verts)
 
-    dirpath = os.path.dirname(os.path.realpath(__file__))
     faces = np.load(os.path.join(dirpath, 'smpl_faces.npy'))
-
+    
     outmesh_path = os.path.join(dirpath, 'smpl_tf.obj')
     with open(outmesh_path, 'w') as fp:
         for v in result:
