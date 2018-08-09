@@ -109,3 +109,4 @@ venv.bak/
 
 *.pkl
 *.obj
+*.mat

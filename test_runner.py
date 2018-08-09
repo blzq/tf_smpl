@@ -21,6 +21,11 @@ if __name__ == '__main__':
     betas = np.random.randn(1, 10).astype(np.float32) * 0.1
     thetas = np.random.randn(1, 72).astype(np.float32) * 0.2
 
+    # import scipy.io
+    # info_dict = scipy.io.loadmat(os.path.join(dirpath, '32_07_c0001_info.mat'))
+    # thetas = np.transpose(info_dict['pose'], (1, 0))[0, np.newaxis]
+    # betas = np.transpose(info_dict['shape'], (1, 0))[0, np.newaxis]
+
     verts, _, _ = smpl_model(betas, thetas, get_skin=True)
     verts = verts[0]
 
